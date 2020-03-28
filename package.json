@@ -1,0 +1,20 @@
+{
+  "name": "eventbooking",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/17robots/EventBooking.git",
+  "author": "17robots <mdray@ameritech.net>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^14.6.0",
+    "mongoose": "^5.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "scripts": {
+    "start": "nodemon index.js"
+  }
+}
