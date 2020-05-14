@@ -86,7 +86,11 @@ module.exports = {
                 password: hashPass
             })
             const result = await user.save()
-            return {...result._doc, password: null, _id: result.id}
+            return {
+                ...result._doc,
+                password: null,
+                _id: result.id
+            }
         } catch(err) {
             throw err;
         }
