@@ -7,9 +7,11 @@
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "create-react-app": "^3.4.1",
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
     "graphql": "^14.6.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.6"
   },
   "devDependencies": {
