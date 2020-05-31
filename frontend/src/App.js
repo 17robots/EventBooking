@@ -1,11 +1,21 @@
 import React from 'react';
+import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
 import './App.css';
+
+import AuthPage from './pages/Auth'
+import EventPage from './pages/Events'
+import BookingPage from './pages/Bookings'
 
 function App() {
   return (
-    <div className="App">
-      <h1>This works</h1>
-    </div>
+    <BrowserRouter>
+      <Switch>
+        <Redirect from="/" to="/auth" exact />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/events" component={EventPage} />
+        <Route path="/bookings" component={BookingPage} />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
