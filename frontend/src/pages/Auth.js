@@ -79,7 +79,9 @@ export default class AuthPage extends Component {
 
     render() {
         return (
-            <form className="auth-form" onSubmit={this.submitHandler}>
+            <React.Fragment>
+                <h1>{this.state.isLogin ? 'Login' : 'Sign Up'}</h1>
+                <form className="auth-form" onSubmit={this.submitHandler}>
                 <div className="form-control">
                     <label htmlFor="email">E-Mail</label>
                     <input type="email" id="email" ref={this.emailEl}/>
@@ -90,9 +92,10 @@ export default class AuthPage extends Component {
                 </div>
                 <div className="form-actions">
                     <button type="submit">Submit</button>
-                    <button type="button" onClick={this.switchModeHandler}>Switch To {(this.state.isLogin ? 'Signup' : 'Log In')}</button>
+                    <button type="button" onClick={this.switchModeHandler}>{(this.state.isLogin ? 'Create Account' : 'Log In')}</button>
                 </div>
             </form>
+            </React.Fragment>
         )
     }
 }
