@@ -3,6 +3,7 @@ import AuthContext from '../context/auth-context'
 
 import Modal from '../components/Modal/Modal'
 import Backdrop from '../components/Backdrop/Backdrop'
+import EventList from '../components/Events/EventList/EventList'
 
 import './Events.css'
 
@@ -127,9 +128,6 @@ export default class EventPage extends Component {
     }
 
     render() {
-        const eventList = this.state.events.map(event => {
-            return <li key={event._id}className="events__list-item">{event.title}</li>
-        })
         return (
             <React.Fragment>
                 {this.state.creating && <Backdrop />}
@@ -162,13 +160,11 @@ export default class EventPage extends Component {
                         </form>
                     </Modal>
                 }
-                <ul className="events__list">
-                    {eventList}
-                </ul>
                 { this.context.token && <div className="events-control">
                     <p>Share Your Own Events!</p>
                     <button className="btn" onClick={this.startCreateEventHandler}>Create Event</button>
                 </div>}
+                <EventList events={this.state.events} />
             </React.Fragment>
         )
     }
