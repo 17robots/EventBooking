@@ -1,20 +1,24 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import AuthContext from '../context/auth-context'
 
 import Modal from '../components/Modal/Modal'
 import Backdrop from '../components/Backdrop/Backdrop'
 import EventList from '../components/Events/EventList/EventList'
+import Spinner from '../components/Spinner/Spinner'
 
 import './Events.css'
 
 export default class EventPage extends Component {
 
+    static contextType = AuthContext
+
     state = {
         creating: false,
-        events: []
+        events: [],
+        isLoading: false,
+        selectedEvent: null
     }
-
-    static contextType = AuthContext
 
     constructor(props) {
         super(props)
@@ -29,19 +33,19 @@ export default class EventPage extends Component {
     }
 
     startCreateEventHandler = () => {
-        this.setState({creating: true})
+        this.setState({ creating: true })
     }
 
     modalConfirmHandler = () => {
-        this.setState({creating: false})
+        this.setState({ creating: false })
         const title = this.titleEl.current.value
         const price = +this.priceEl.current.value
         const date = this.dateEl.current.value
         const description = this.descriptionEl.current.value
 
-        if(title.trim().length === 0 || price <= 0 || date.trim().length === 0 || description.trim().length === 0) return 
+        if (title.trim().length === 0 || price <= 0 || date.trim().length === 0 || description.trim().length === 0) return
 
-        const event = {title, price, date, description}
+        const event = { title, price, date, description }
         console.log(event)
 
         const requestBody = {
@@ -53,10 +57,6 @@ export default class EventPage extends Component {
                         description
                         date
                         price
-                        creator {
-                            _id
-                            email
-                        }
                     }
                 }
             `
@@ -72,23 +72,46 @@ export default class EventPage extends Component {
                 'Authorization': 'Bearer ' + token
             }
         })
-        .then(res => {
-            if(res.status !== 200 && res.status !== 201) {
-                throw new Error('Failed')
-            }
-            return res.json()
-        })
-        .then(resData => {
-            this.fetchEvents()
-        })
-        .catch(err => console.log(err))
+            .then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                    throw new Error('Failed')
+                }
+                return res.json()
+            })
+            .then(resData => {
+                this.setState(prevState => {
+                    const updatedEvent = [...prevState.events]
+                    updatedEvent.push({
+                        _id: resData.data.createEvent._id,
+                        title: resData.data.createEvent.title,
+                        description: resData.data.createEvent.description,
+                        date: resData.data.createEvent.date,
+                        price: resData.data.createEvent.price,
+                        creator: {
+                            _id: this.context.userId
+                        }
+                    })
+                    return { events: updatedEvent }
+                })
+            })
+            .catch(err => console.log(err))
     }
 
     modalCancelHandler = () => {
-        this.setState({creating: false})
+        this.setState({ creating: false, selectedEvent: null })
     }
 
+    showDetailHandler = eventId => {
+        this.setState(prevState => {
+            const selectedEvent = prevState.events.find(e => e._id === eventId)
+            return { selectedEvent: selectedEvent }
+        })
+    }
+
+    bookEventHandler = () => { console.log("Add Event Booking here") }
+
     fetchEvents() {
+        this.setState({ isLoading: true })
         const requestBody = {
             query: `
                 query {
@@ -114,32 +137,36 @@ export default class EventPage extends Component {
                 'Content-Type': 'application/json',
             }
         })
-        .then(res => {
-            if(res.status !== 200 && res.status !== 201) {
-                throw new Error('Failed')
-            }
-            return res.json()
-        })
-        .then(resData => {
-            const events = resData.data.events
-            this.setState({events: events})
-        })
-        .catch(err => console.log(err))
+            .then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                    throw new Error('Failed')
+                }
+                return res.json()
+            })
+            .then(resData => {
+                const events = resData.data.events
+                this.setState({ events: events, isLoading: false })
+            })
+            .catch(err => {
+                console.log(err)
+                this.setState({ isLoading: false })
+            })
     }
 
     render() {
         return (
             <React.Fragment>
-                {this.state.creating && <Backdrop />}
+                {(this.state.creating || this.state.selectedEvent) && <Backdrop />}
                 {
-                    this.state.creating && 
+                    this.state.creating &&
                     <Modal
                         title="Add Event"
                         canCancel
                         canConfirm
                         onCancel={this.modalCancelHandler}
-                        onConfirm={this.modalConfirmHandler
-                    }>
+                        onConfirm={this.modalConfirmHandler}
+                        confirmText="Confirm"
+                    >
                         <form>
                             <div className="form-control">
                                 <label htmlFor="title">Title</label>
@@ -160,11 +187,33 @@ export default class EventPage extends Component {
                         </form>
                     </Modal>
                 }
-                { this.context.token && <div className="events-control">
+                {this.state.selectedEvent && (
+                    <Modal
+                        title="Event Details"
+                        canCancel
+                        canConfirm={this.context.userId ? true : false}
+                        onCancel={this.modalCancelHandler}
+                        onConfirm={this.bookEventHandler}
+                        confirmText={this.state.selectedEvent.creator._id === this.context.userId ? "Edit Event" : "Book Event"}
+                    >
+                        <h1>{this.state.selectedEvent.title}</h1>
+                        <h3>Date: {new Date(this.state.selectedEvent.date).toLocaleDateString()}</h3>
+                        <h3>Price: {this.state.selectedEvent.price}</h3>
+                        <h3>Details</h3>
+                        <p>{this.state.selectedEvent.description}</p>
+                        {!this.context.userId && <p>You must <Link to="/auth">log in</Link> to book the event</p>}
+                    </Modal>
+                )}
+                {this.context.token && <div className="events-control">
                     <p>Share Your Own Events!</p>
                     <button className="btn" onClick={this.startCreateEventHandler}>Create Event</button>
                 </div>}
-                <EventList events={this.state.events} />
+                {
+                    this.state.isLoading ?
+                        <Spinner />
+                        :
+                        <EventList events={this.state.events} authUserId={this.context.userId} onViewDetail={this.showDetailHandler} />
+                }
             </React.Fragment>
         )
     }

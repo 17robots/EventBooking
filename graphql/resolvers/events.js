@@ -5,19 +5,19 @@ const { transformEvent } = require('./merge')
 module.exports = {
     events: async () => {
         try {
-        const events = await Event.find()
-        return events.map(event => {
-            return transformEvent(event)
-        })
-        } catch(err) {
+            const events = await Event.find()
+            return events.map(event => {
+                return transformEvent(event)
+            })
+        } catch (err) {
             throw err
         }
     },
     createEvent: async (args, req) => {
-        if(!req.isAuth) {
+        if (!req.isAuth) {
             throw new Error('Unauthenticated!')
         }
-        const {title, description, price, date} = args.eventInput
+        const { title, description, price, date } = args.eventInput
         const event = new Event({
             title: title,
             description: description,
@@ -30,15 +30,20 @@ module.exports = {
             const result = await event.save()
             createdEvent = transformEvent(result)
             const user = await User.findById(req.userId)
-            if(!user) {
+            if (!user) {
                 throw new Error('User not found')
             }
             user.createdEvents.push(event)
             await user.save()
             return createdEvent
-        } catch(err) {
+        } catch (err) {
             console.log(err)
             throw err
         }
     },
+    editEvent: async (args, req) => {
+        if (!req.isAuth) throw new Error('Unauthorized!')
+        const { title, description, price, date } = args.eventInput
+
+    }
 }

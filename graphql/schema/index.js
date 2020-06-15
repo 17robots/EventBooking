@@ -53,6 +53,7 @@ type RootQuery {
 type RootMutation {
     createEvent(eventInput: EventInput): Event
     createUser(userInput: UserInput): User
+    editEvent(eventId: ID!): Event
     bookEvent(eventId: ID!): Booking
     cancelBooking(bookingId: ID!): Event
 }

@@ -11,10 +11,10 @@ const modal = (props) => (
             {props.children}
         </section>
         <section className="modal__actions">
-           {props.canCancel && <button className="btn" onClick={props.onCancel}>Cancel</button>}
-            {props.canConfirm && <button className="btn"onClick={props.onConfirm}>Confirm</button>}
+            {props.canCancel && <button className="btn" onClick={props.onCancel}>Cancel</button>}
+            {props.canConfirm && <button className="btn" onClick={props.onConfirm}>{props.confirmText}</button>}
         </section>
-    </div> 
+    </div>
 )
 
 export default modal
