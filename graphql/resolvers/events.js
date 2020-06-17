@@ -43,7 +43,5 @@ module.exports = {
     },
     editEvent: async (args, req) => {
         if (!req.isAuth) throw new Error('Unauthorized!')
-        const { title, description, price, date } = args.eventInput
-
     }
 }
