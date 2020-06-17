@@ -43,5 +43,16 @@ module.exports = {
     },
     editEvent: async (args, req) => {
         if (!req.isAuth) throw new Error('Unauthorized!')
+        const { title, description, price, date } = args.updatedEvent
+        try {
+            const foundEvent = await Event.findById(args.eventId)
+            if(!foundEvent) throw new Error('Event Not Found!')
+            foundEvent.title = title
+            foundEvent.description = description
+            foundEvent.price = price
+            foundEvent.date = date
+            await foundEvent.save()
+            return foundEvent // since we give back the event
+        } catch(err) { throw new Error(err); console.log(err) }
     }
 }

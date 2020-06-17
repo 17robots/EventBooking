@@ -6,6 +6,7 @@ import Modal from '../components/Modal/Modal'
 import Backdrop from '../components/Backdrop/Backdrop'
 import EventList from '../components/Events/EventList/EventList'
 import Spinner from '../components/Spinner/Spinner'
+import EventDetails from '../components/Events/EventDetails/EventDetails'
 
 import './Events.css'
 
@@ -15,6 +16,7 @@ export default class EventPage extends Component {
 
     state = {
         creating: false,
+        editing: false,
         events: [],
         isLoading: false,
         selectedEvent: null
@@ -196,12 +198,7 @@ export default class EventPage extends Component {
                         onConfirm={this.bookEventHandler}
                         confirmText={this.state.selectedEvent.creator._id === this.context.userId ? "Edit Event" : "Book Event"}
                     >
-                        <h1>{this.state.selectedEvent.title}</h1>
-                        <h3>Date: {new Date(this.state.selectedEvent.date).toLocaleDateString()}</h3>
-                        <h3>Price: {this.state.selectedEvent.price}</h3>
-                        <h3>Details</h3>
-                        <p>{this.state.selectedEvent.description}</p>
-                        {!this.context.userId && <p>You must <Link to="/auth">log in</Link> to book the event</p>}
+                        {!this.state.editing && <EventDetails context={this.context} selectedEvent={this.state.selectedEvent} />}
                     </Modal>
                 )}
                 {this.context.token && <div className="events-control">
