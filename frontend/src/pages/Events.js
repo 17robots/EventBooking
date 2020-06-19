@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import AuthContext from '../context/auth-context'
 
 import Modal from '../components/Modal/Modal'
@@ -110,7 +109,53 @@ export default class EventPage extends Component {
         })
     }
 
-    bookEventHandler = () => { console.log("Add Event Booking here") }
+    bookEventHandler = () => { 
+        const requestBody = {
+            query: `
+                mutation {
+                    bookEvent(eventId: ${this.selectedEvent._id}}) {
+                        _id
+                        createdAt
+                        updatedAt
+                    }
+                }
+            `
+        }
+
+        const token = this.context.token
+
+        fetch('http://localhost:8000/graphql', {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(res => {
+            if (res.status !== 200 && res.status !== 201) {
+                throw new Error('Failed')
+            }
+            return res.json()
+        })
+        .then(resData => {
+            this.setState(prevState => {
+                const updatedEvent = [...prevState.events]
+                updatedEvent.push({
+                    _id: resData.data.createEvent._id,
+                    title: resData.data.createEvent.title,
+                    description: resData.data.createEvent.description,
+                    date: resData.data.createEvent.date,
+                    price: resData.data.createEvent.price,
+                    creator: {
+                        _id: this.context.userId
+                    }
+                })
+                return { events: updatedEvent }
+            })
+        })
+        .catch(err => console.log(err))
+    }
 
     fetchEvents() {
         this.setState({ isLoading: true })
@@ -193,13 +238,14 @@ export default class EventPage extends Component {
                     <Modal
                         title="Event Details"
                         canCancel
-                        canConfirm={this.context.userId ? true : false}
+                        canConfirm={(this.context.userId && this.context.userId !== this.state.selectedEvent.creator._id) ? true : false}
                         onCancel={this.modalCancelHandler}
                         onConfirm={this.bookEventHandler}
-                        confirmText={this.state.selectedEvent.creator._id === this.context.userId ? "Edit Event" : "Book Event"}
+                        confirmText="Book Event"
                     >
-                        {!this.state.editing && <EventDetails context={this.context} selectedEvent={this.state.selectedEvent} />}
+                        <EventDetails context={this.context} selectedEvent={this.state.selectedEvent} />
                     </Modal>
+
                 )}
                 {this.context.token && <div className="events-control">
                     <p>Share Your Own Events!</p>
